@@ -5,31 +5,51 @@ import * as taskStore from "@/lib/tasks/store";
 
 export const createTaskTool = tool({
   description:
-    "Create a new task. Use this when the user mentions something they need to do, a goal, or an action item.",
+    "Create a new task. Use this when the user mentions something they need to do, a goal, or an action item. Start and end time are required.",
   inputSchema: z.object({
     title: z.string().describe("Short, clear task title"),
     description: z
       .string()
       .optional()
       .describe("Additional details about the task"),
+    notes: z
+      .string()
+      .optional()
+      .describe("Optional notes the user wants attached to the task"),
+    startTime: z
+      .string()
+      .describe("Task start time or time range start, in the user's preferred format"),
+    endTime: z
+      .string()
+      .describe("Task end time or time range end, in the user's preferred format"),
     priority: z
       .enum(["low", "medium", "high"])
       .optional()
       .describe("Task priority (default: medium)"),
   }),
-  execute: async ({ title, description, priority }) => {
-    const task = taskStore.addTask({ title, description, priority });
-    return `Task created: "${task.title}" [${task.id}] with priority ${task.priority}`;
+  execute: async ({ title, description, notes, startTime, endTime, priority }) => {
+    const task = taskStore.addTask({
+      title,
+      description,
+      notes,
+      startTime,
+      endTime,
+      priority,
+    });
+    return `Task created: #${task.serialNumber} "${task.title}" [${task.id}] from ${task.startTime} to ${task.endTime} with priority ${task.priority}`;
   },
 });
 
 export const updateTaskTool = tool({
   description:
-    "Update an existing task's title, description, status, or priority.",
+    "Update an existing task's title, description, notes, start time, end time, status, or priority.",
   inputSchema: z.object({
     id: z.string().describe("The task ID to update"),
     title: z.string().optional().describe("New title"),
     description: z.string().optional().describe("New description"),
+    notes: z.string().optional().describe("New notes"),
+    startTime: z.string().optional().describe("New start time"),
+    endTime: z.string().optional().describe("New end time"),
     status: z
       .enum(["pending", "in_progress", "completed"])
       .optional()
@@ -42,7 +62,7 @@ export const updateTaskTool = tool({
   execute: async ({ id, ...data }) => {
     const updated = taskStore.updateTask(id, data);
     if (!updated) return `Error: Task with ID "${id}" not found.`;
-    return `Task updated: "${updated.title}" [${updated.id}] — status: ${updated.status}, priority: ${updated.priority}`;
+    return `Task updated: #${updated.serialNumber} "${updated.title}" [${updated.id}] — status: ${updated.status}, priority: ${updated.priority}`;
   },
 });
 
@@ -68,7 +88,7 @@ export const listTasksTool = tool({
     return tasks
       .map(
         (t) =>
-          `[${t.id}] ${t.title} — status: ${t.status}, priority: ${t.priority}${t.description ? ` | ${t.description}` : ""}`
+          `#${t.serialNumber} [${t.id}] ${t.title} — ${t.startTime} to ${t.endTime}, status: ${t.status}, priority: ${t.priority}${t.notes ? ` | notes: ${t.notes}` : ""}${t.description ? ` | ${t.description}` : ""}`
       )
       .join("\n");
   },
@@ -89,6 +109,8 @@ Rules:
 - Always confirm what you did after a tool call (e.g., "Created task: Buy groceries")
 - Be concise. Use short sentences.
 - Match the technical tone of the interface.
+- When creating a task, collect a start time and an end time. If either is missing, ask a follow-up question instead of creating the task.
+- Include notes when the user provides them.
 - Don't create duplicate tasks — check existing tasks if unsure.
 - If the user just chats casually without mentioning tasks, respond conversationally without creating tasks.`;
 

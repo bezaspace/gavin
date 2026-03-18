@@ -27,7 +27,9 @@ export function TaskPanel() {
   }, []);
 
   useEffect(() => {
-    fetchTasks();
+    queueMicrotask(() => {
+      void fetchTasks();
+    });
     listeners.add(fetchTasks);
     return () => {
       listeners.delete(fetchTasks);
@@ -42,7 +44,7 @@ export function TaskPanel() {
     <div className="flex flex-col h-full">
       <div className="border-b border-[rgba(122,155,168,0.1)] px-4 py-3">
         <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim mb-2">
-          // Task Queue
+          {"// Task Queue"}
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-1.5">

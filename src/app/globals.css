@@ -32,6 +32,11 @@
   scrollbar-color: var(--border-subtle) transparent;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   background: var(--bg-primary);
   color: var(--text-primary);

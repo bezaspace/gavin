@@ -33,14 +33,14 @@ export function ChatPanel() {
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="border-b border-[rgba(122,155,168,0.1)] px-4 py-3">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+      <div className="border-b border-[rgba(122,155,168,0.1)] px-4 py-3 shrink-0">
         <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-          // Chat Terminal
+          {"// Chat Terminal"}
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <div className="text-text-dim text-[11px] text-center py-12">
             <div className="text-[8px] uppercase tracking-[0.15em] mb-2">

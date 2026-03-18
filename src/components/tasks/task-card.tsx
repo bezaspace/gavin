@@ -33,6 +33,14 @@ export function TaskCard({ task }: TaskCardProps) {
     <div className="border border-[rgba(122,155,168,0.1)] bg-bg-panel px-3 py-2 hover:border-[rgba(122,155,168,0.2)] transition-colors">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[8px] uppercase tracking-[0.15em] text-text-dim border border-[rgba(122,155,168,0.12)] px-1.5 py-0.5">
+              #{task.serialNumber}
+            </span>
+            <span className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
+              {task.startTime} - {task.endTime}
+            </span>
+          </div>
           <div
             className={`text-[11px] leading-relaxed ${
               task.status === "completed"
@@ -43,8 +51,13 @@ export function TaskCard({ task }: TaskCardProps) {
             {task.title}
           </div>
           {task.description && (
-            <div className="text-[9px] text-text-dim mt-0.5 truncate">
+            <div className="text-[9px] text-text-dim mt-0.5">
               {task.description}
+            </div>
+          )}
+          {task.notes && (
+            <div className="mt-1 border-l border-[rgba(122,155,168,0.15)] pl-2 text-[9px] text-text-dim whitespace-pre-wrap">
+              {task.notes}
             </div>
           )}
         </div>

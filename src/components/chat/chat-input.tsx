@@ -25,22 +25,22 @@ export function ChatInput({ value, onChange, onSubmit, isLoading }: ChatInputPro
   }
 
   return (
-    <div className="border-t border-[rgba(122,155,168,0.1)] p-3">
-      <form onSubmit={handleFormSubmit} className="flex gap-2 items-end">
+    <div className="shrink-0 border-t border-[rgba(122,155,168,0.1)] px-4 py-4 bg-[rgba(10,12,14,0.4)]">
+      <form onSubmit={handleFormSubmit} className="flex gap-3 items-end w-full">
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Enter command..."
           rows={1}
-          className="flex-1 bg-transparent border border-[rgba(122,155,168,0.2)] px-3 py-2 text-[11px] text-text-primary placeholder:text-text-dim resize-none outline-none focus:border-accent-primary transition-colors min-h-[32px] max-h-[120px]"
-          style={{ lineHeight: "1.4" }}
+          className="flex-1 bg-transparent border border-[rgba(122,155,168,0.2)] px-4 py-3 text-[12px] text-text-primary placeholder:text-text-dim resize-none outline-none focus:border-accent-primary transition-colors min-h-[44px] max-h-[160px] rounded-none"
+          style={{ lineHeight: "1.5" }}
           disabled={isLoading}
         />
         <button
           type="submit"
           disabled={!value.trim() || isLoading}
-          className="border border-[rgba(122,155,168,0.2)] px-4 py-2 text-[8px] uppercase tracking-[0.15em] text-text-primary hover:border-accent-primary hover:text-text-bright transition-colors disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap"
+          className="border border-[rgba(122,155,168,0.2)] px-6 py-3 text-[9px] uppercase tracking-[0.18em] text-text-primary hover:border-accent-primary hover:text-text-bright transition-all disabled:opacity-20 disabled:cursor-not-allowed whitespace-nowrap bg-[rgba(122,155,168,0.02)] hover:bg-[rgba(122,155,168,0.06)]"
         >
           {isLoading ? "Processing..." : "Send"}
         </button>
