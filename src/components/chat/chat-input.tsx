@@ -31,7 +31,7 @@ export function ChatInput({ value, onChange, onSubmit, isLoading }: ChatInputPro
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Enter command..."
+          placeholder="Ask Gavin to create tasks, break them into subtasks, or suggest a checklist..."
           rows={1}
           className="flex-1 bg-transparent border border-[rgba(122,155,168,0.2)] px-4 py-3 text-[12px] text-text-primary placeholder:text-text-dim resize-none outline-none focus:border-accent-primary transition-colors min-h-[44px] max-h-[160px] rounded-none"
           style={{ lineHeight: "1.5" }}

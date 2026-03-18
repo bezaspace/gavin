@@ -2,7 +2,18 @@
 
 import type { UIMessage } from "ai";
 
-const TOOL_NAMES = ["createTask", "updateTask", "deleteTask", "listTasks"] as const;
+const TOOL_NAMES = [
+  "createTask",
+  "updateTask",
+  "rescheduleTask",
+  "completeTask",
+  "addSubtasks",
+  "toggleSubtask",
+  "deleteSubtask",
+  "suggestSubtasks",
+  "deleteTask",
+  "listTasks",
+] as const;
 type ToolName = (typeof TOOL_NAMES)[number];
 
 function isToolPart(part: UIMessage["parts"][number]): part is UIMessage["parts"][number] & { type: `tool-${ToolName}`; state: string } {

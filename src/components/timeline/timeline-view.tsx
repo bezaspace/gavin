@@ -19,8 +19,10 @@ type FetchState = {
 
 const HOUR_START = 6 * 60;
 const HOUR_END = 22 * 60;
-const PX_PER_MINUTE = 1.15;
-const MIN_BLOCK_HEIGHT = 72;
+const PX_PER_MINUTE = 2.2;
+const MIN_BLOCK_HEIGHT = 88;
+const VISUAL_MIN_DURATION = MIN_BLOCK_HEIGHT / PX_PER_MINUTE;
+const VERTICAL_GAP_MINUTES = 8 / PX_PER_MINUTE;
 
 function parseTime(value: string): number {
   const input = value.trim().toLowerCase();
@@ -84,13 +86,18 @@ function assignLanes(tasks: TimelineTask[]): number[] {
   const assignments: number[] = [];
 
   tasks.forEach((task) => {
-    let laneIndex = lanes.findIndex((lane) => lane.endMinutes <= task.startMinutes);
+    // The visual end of a task is the maximum of its actual end and its visual duration footprint
+    const visualEnd = Math.max(task.endMinutes, task.startMinutes + VISUAL_MIN_DURATION);
+    
+    // Find a lane where the previous task's visual end (plus a small vertical gap) 
+    // is before this task's start time.
+    let laneIndex = lanes.findIndex((lane) => lane.endMinutes + VERTICAL_GAP_MINUTES <= task.startMinutes);
 
     if (laneIndex === -1) {
       laneIndex = lanes.length;
-      lanes.push({ endMinutes: task.endMinutes });
+      lanes.push({ endMinutes: visualEnd });
     } else {
-      lanes[laneIndex].endMinutes = task.endMinutes;
+      lanes[laneIndex].endMinutes = visualEnd;
     }
 
     assignments.push(laneIndex);
@@ -122,8 +129,15 @@ export function TimelineView() {
 
     void loadTasks();
 
+    const refresh = () => {
+      void loadTasks();
+    };
+
+    window.addEventListener("tasks:changed", refresh);
+
     return () => {
       active = false;
+      window.removeEventListener("tasks:changed", refresh);
     };
   }, []);
 
@@ -191,7 +205,7 @@ export function TimelineView() {
                   }}
                 >
                   <div
-                    className={`relative h-full border px-3 py-3 shadow-[0_0_0_1px_rgba(122,155,168,0.05)] ${
+                    className={`relative h-full border px-3 py-3 shadow-[0_0_0_1px_rgba(122,155,168,0.05)] overflow-hidden ${
                       isDone
                         ? "border-status-success/40 bg-[rgba(74,152,104,0.08)]"
                         : isActive
@@ -222,8 +236,12 @@ export function TimelineView() {
                     <div className="mt-3 text-[11px] leading-relaxed text-text-bright">
                       {task.title}
                     </div>
-                    <div className="mt-1 text-[9px] uppercase tracking-[0.12em] text-text-dim">
-                      {formatRange(task.startMinutes, task.endMinutes)}
+                     <div className="mt-1 text-[9px] uppercase tracking-[0.12em] text-text-dim">
+                       {formatRange(task.startMinutes, task.endMinutes)}
+                     </div>
+                    <div className="mt-1 text-[8px] uppercase tracking-[0.12em] text-text-dim">
+                      Attempt {task.currentAttemptNumber}
+                      {task.reassignmentCount > 0 ? ` | Reassigned ${task.reassignmentCount}` : ""}
                     </div>
                     {task.notes && (
                       <div className="mt-2 text-[9px] text-text-dim overflow-hidden max-h-10">

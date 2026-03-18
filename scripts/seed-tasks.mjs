@@ -10,6 +10,7 @@ mkdirSync(dataDir, { recursive: true });
 
 const dbPath = join(dataDir, "gavin.db");
 const db = new Database(dbPath);
+db.pragma("foreign_keys = ON");
 
 function hasColumn(table, column) {
   const stmt = db.prepare(`PRAGMA table_info(${table})`);
@@ -40,7 +41,37 @@ function ensureSchema() {
       end_time TEXT DEFAULT '',
       status TEXT DEFAULT 'pending',
       priority TEXT DEFAULT 'medium',
+      current_attempt_number INTEGER DEFAULT 1,
+      reassignment_count INTEGER DEFAULT 0,
+      completed_at TEXT DEFAULT NULL,
       created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS task_attempts (
+      id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      attempt_number INTEGER NOT NULL,
+      scheduled_start_time TEXT NOT NULL,
+      scheduled_end_time TEXT NOT NULL,
+      outcome TEXT NOT NULL DEFAULT 'scheduled',
+      reason TEXT DEFAULT '',
+      completion_notes TEXT DEFAULT '',
+      reassigned_start_time TEXT DEFAULT '',
+      reassigned_end_time TEXT DEFAULT '',
+      created_at TEXT NOT NULL,
+      resolved_at TEXT DEFAULT NULL,
+      FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS task_subtasks (
+      id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      is_completed INTEGER NOT NULL DEFAULT 0,
+      order_index INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      completed_at TEXT DEFAULT NULL,
+      FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
     );
   `);
 
@@ -72,6 +103,15 @@ function ensureSchema() {
   if (!hasColumn("tasks", "end_time")) {
     db.exec(`ALTER TABLE tasks ADD COLUMN end_time TEXT DEFAULT ''`);
   }
+  if (!hasColumn("tasks", "current_attempt_number")) {
+    db.exec(`ALTER TABLE tasks ADD COLUMN current_attempt_number INTEGER DEFAULT 1`);
+  }
+  if (!hasColumn("tasks", "reassignment_count")) {
+    db.exec(`ALTER TABLE tasks ADD COLUMN reassignment_count INTEGER DEFAULT 0`);
+  }
+  if (!hasColumn("tasks", "completed_at")) {
+    db.exec(`ALTER TABLE tasks ADD COLUMN completed_at TEXT DEFAULT NULL`);
+  }
 
   db.exec(`
     CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_serial_number ON projects(serial_number);
@@ -79,6 +119,12 @@ function ensureSchema() {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_serial_number ON tasks(serial_number);
     CREATE INDEX IF NOT EXISTS idx_created_at ON tasks(created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id);
+    CREATE INDEX IF NOT EXISTS idx_task_attempts_task_id ON task_attempts(task_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_task_attempts_task_attempt
+      ON task_attempts(task_id, attempt_number);
+    CREATE INDEX IF NOT EXISTS idx_task_subtasks_task_id ON task_subtasks(task_id);
+    CREATE INDEX IF NOT EXISTS idx_task_subtasks_order
+      ON task_subtasks(task_id, order_index, created_at);
   `);
 }
 
@@ -120,11 +166,31 @@ const tasksByProject = [
     {
       title: "Map card hierarchy",
       description: "Define the final density and spacing rhythm for project cards.",
-      notes: "Keep borders sharp and preserve the tactical HUD tone.",
+      notes: "Captured spacing rules and card edge cases for the current attempt.",
       startTime: "08:00",
       endTime: "08:45",
       status: "in_progress",
       priority: "high",
+      attempts: [
+        {
+          scheduledStartTime: "07:00",
+          scheduledEndTime: "07:30",
+          outcome: "missed",
+          reason: "Pulled into a design review that overran.",
+          reassignedStartTime: "08:00",
+          reassignedEndTime: "08:45",
+        },
+        {
+          scheduledStartTime: "08:00",
+          scheduledEndTime: "08:45",
+          outcome: "scheduled",
+        },
+      ],
+      subtasks: [
+        { title: "Review current project card density", isCompleted: true },
+        { title: "List spacing exceptions", isCompleted: false },
+        { title: "Capture updated hierarchy notes", isCompleted: false },
+      ],
     },
     {
       title: "Polish modal header actions",
@@ -134,6 +200,10 @@ const tasksByProject = [
       endTime: "09:30",
       status: "pending",
       priority: "medium",
+      subtasks: [
+        { title: "Audit edit button position", isCompleted: false },
+        { title: "Compare create-task button spacing", isCompleted: false },
+      ],
     },
     {
       title: "Tune project empty state",
@@ -147,11 +217,23 @@ const tasksByProject = [
     {
       title: "Review card hover feedback",
       description: "Confirm hover states stay subtle and readable on desktop.",
-      notes: "No glow or heavy effects; just enough response to imply interactivity.",
+      notes: "Validated hover behavior against the tactical palette.",
       startTime: "10:30",
       endTime: "11:00",
       status: "completed",
       priority: "low",
+      attempts: [
+        {
+          scheduledStartTime: "10:30",
+          scheduledEndTime: "11:00",
+          outcome: "completed",
+          completionNotes: "Reviewed hover borders and softened the inactive state without adding glow.",
+        },
+      ],
+      subtasks: [
+        { title: "Check hover border alpha", isCompleted: true },
+        { title: "Verify hover state on card grid", isCompleted: true },
+      ],
     },
     {
       title: "Capture before-and-after screenshots",
@@ -172,6 +254,10 @@ const tasksByProject = [
       endTime: "09:00",
       status: "pending",
       priority: "high",
+      subtasks: [
+        { title: "Test missing startTime validation", isCompleted: false },
+        { title: "Test missing endTime validation", isCompleted: false },
+      ],
     },
     {
       title: "Audit migration safety",
@@ -194,11 +280,31 @@ const tasksByProject = [
     {
       title: "Document project-aware task API",
       description: "Write usage notes for projectId in POST and PATCH routes.",
-      notes: "Mention chat references by title and serial number.",
+      notes: "Documented payload expectations and examples for linked tasks.",
       startTime: "11:00",
       endTime: "11:45",
       status: "completed",
       priority: "medium",
+      attempts: [
+        {
+          scheduledStartTime: "10:00",
+          scheduledEndTime: "10:30",
+          outcome: "missed",
+          reason: "Needed API examples from the project flow first.",
+          reassignedStartTime: "11:00",
+          reassignedEndTime: "11:45",
+        },
+        {
+          scheduledStartTime: "11:00",
+          scheduledEndTime: "11:45",
+          outcome: "completed",
+          completionNotes: "Wrote the request notes after validating POST and PATCH behavior with project references.",
+        },
+      ],
+      subtasks: [
+        { title: "Verify projectId docs", isCompleted: true },
+        { title: "Add serial number example", isCompleted: true },
+      ],
     },
     {
       title: "Spot-check database indexes",
@@ -237,6 +343,10 @@ const tasksByProject = [
       endTime: "10:45",
       status: "in_progress",
       priority: "high",
+      subtasks: [
+        { title: "Test modal body scroll", isCompleted: true },
+        { title: "Test page-to-modal scroll handoff", isCompleted: false },
+      ],
     },
     {
       title: "Review touch target sizing",
@@ -250,22 +360,46 @@ const tasksByProject = [
     {
       title: "Capture mobile QA notes",
       description: "Summarize the key viewport-specific issues and wins.",
-      notes: "Use direct language and keep the report actionable.",
+      notes: "Logged the viewport findings and next fixes.",
       startTime: "11:45",
       endTime: "12:15",
       status: "completed",
       priority: "low",
+      attempts: [
+        {
+          scheduledStartTime: "11:45",
+          scheduledEndTime: "12:15",
+          outcome: "completed",
+          completionNotes: "Summarized scroll, density, and touch-target findings into a short QA note set.",
+        },
+      ],
+      subtasks: [
+        { title: "Summarize touch findings", isCompleted: true },
+        { title: "List viewport-specific issues", isCompleted: true },
+      ],
     },
   ],
   [
     {
       title: "Link active tasks to projects",
       description: "Assign operational work items to the right project streams.",
-      notes: "Use this pass to validate project-aware task visibility.",
+      notes: "Validated project-aware task visibility with linked work items.",
       startTime: "08:00",
       endTime: "08:30",
       status: "completed",
       priority: "medium",
+      attempts: [
+        {
+          scheduledStartTime: "08:00",
+          scheduledEndTime: "08:30",
+          outcome: "completed",
+          completionNotes: "Matched the active task set to the project streams and verified the resulting visibility.",
+        },
+      ],
+      subtasks: [
+        { title: "Confirm linked task rows", isCompleted: true },
+        { title: "Validate project counts manually", isCompleted: false },
+      ],
     },
     {
       title: "Design task summary rows",
@@ -293,6 +427,18 @@ const tasksByProject = [
       endTime: "11:00",
       status: "completed",
       priority: "high",
+      attempts: [
+        {
+          scheduledStartTime: "10:30",
+          scheduledEndTime: "11:00",
+          outcome: "completed",
+          completionNotes: "Confirmed the filtered API only returns tasks bound to the active project id.",
+        },
+      ],
+      subtasks: [
+        { title: "Call filtered endpoint", isCompleted: true },
+        { title: "Confirm unrelated tasks are excluded", isCompleted: true },
+      ],
     },
     {
       title: "Prepare ops walkthrough",
@@ -322,6 +468,10 @@ const tasksByProject = [
       endTime: "10:00",
       status: "in_progress",
       priority: "medium",
+      subtasks: [
+        { title: "Outline intro framing", isCompleted: true },
+        { title: "Add task-history talking point", isCompleted: false },
+      ],
     },
     {
       title: "Review stakeholder screenshots",
@@ -335,11 +485,23 @@ const tasksByProject = [
     {
       title: "Check final wording pass",
       description: "Tighten microcopy across modals and empty states.",
-      notes: "Keep everything short, precise, and tactical.",
+      notes: "Tightened the remaining empty-state copy and action labels.",
       startTime: "11:00",
       endTime: "11:30",
       status: "completed",
       priority: "low",
+      attempts: [
+        {
+          scheduledStartTime: "11:00",
+          scheduledEndTime: "11:30",
+          outcome: "completed",
+          completionNotes: "Reviewed modal labels and empty-state copy to keep the language concise and tactical.",
+        },
+      ],
+      subtasks: [
+        { title: "Review modal microcopy", isCompleted: true },
+        { title: "Review empty state wording", isCompleted: true },
+      ],
     },
     {
       title: "Run readiness review",
@@ -353,9 +515,56 @@ const tasksByProject = [
   ],
 ];
 
+function buildAttempts(task, taskCreatedAt) {
+  const attempts = task.attempts ?? [
+    {
+      scheduledStartTime: task.startTime,
+      scheduledEndTime: task.endTime,
+      outcome: task.status === "completed" ? "completed" : "scheduled",
+      completionNotes: task.status === "completed" ? task.notes : "",
+    },
+  ];
+
+  return attempts.map((attempt, index) => ({
+    id: `attempt_${randomUUID().slice(0, 8)}`,
+    attemptNumber: index + 1,
+    scheduledStartTime: attempt.scheduledStartTime,
+    scheduledEndTime: attempt.scheduledEndTime,
+    outcome: attempt.outcome,
+    reason: attempt.reason ?? "",
+    completionNotes: attempt.completionNotes ?? "",
+    reassignedStartTime: attempt.reassignedStartTime ?? "",
+    reassignedEndTime: attempt.reassignedEndTime ?? "",
+    createdAt: new Date(new Date(taskCreatedAt).getTime() + index * 60_000).toISOString(),
+    resolvedAt:
+      attempt.outcome === "scheduled"
+        ? null
+        : new Date(new Date(taskCreatedAt).getTime() + index * 60_000 + 30_000).toISOString(),
+  }));
+}
+
+function buildSubtasks(task, taskCreatedAt) {
+  return (task.subtasks ?? []).map((subtask, index) => {
+    const createdAt = new Date(
+      new Date(taskCreatedAt).getTime() + (index + 1) * 15_000
+    ).toISOString();
+
+    return {
+      id: `subtask_${randomUUID().slice(0, 8)}`,
+      title: subtask.title,
+      isCompleted: Boolean(subtask.isCompleted),
+      orderIndex: index,
+      createdAt,
+      completedAt: subtask.isCompleted ? createdAt : null,
+    };
+  });
+}
+
 function resetAndSeed() {
   ensureSchema();
 
+  db.prepare("DELETE FROM task_subtasks").run();
+  db.prepare("DELETE FROM task_attempts").run();
   db.prepare("DELETE FROM tasks").run();
   db.prepare("DELETE FROM projects").run();
 
@@ -384,9 +593,43 @@ function resetAndSeed() {
       end_time,
       status,
       priority,
+      current_attempt_number,
+      reassignment_count,
+      completed_at,
       created_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const insertAttemptStmt = db.prepare(`
+    INSERT INTO task_attempts (
+      id,
+      task_id,
+      attempt_number,
+      scheduled_start_time,
+      scheduled_end_time,
+      outcome,
+      reason,
+      completion_notes,
+      reassigned_start_time,
+      reassigned_end_time,
+      created_at,
+      resolved_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const insertSubtaskStmt = db.prepare(`
+    INSERT INTO task_subtasks (
+      id,
+      task_id,
+      title,
+      is_completed,
+      order_index,
+      created_at,
+      completed_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
   const now = Date.now();
@@ -409,19 +652,59 @@ function resetAndSeed() {
 
       tasksByProject[projectIndex].forEach((task, taskIndex) => {
         const serialNumber = projectIndex * 5 + taskIndex + 1;
+        const taskId = `task_${serialNumber}_${randomUUID().slice(0, 8)}`;
+        const taskCreatedAt = new Date(now - serialNumber * 60_000).toISOString();
+        const attempts = buildAttempts(task, taskCreatedAt);
+        const subtasks = buildSubtasks(task, taskCreatedAt);
+        const latestAttempt = attempts[attempts.length - 1];
+        const reassignmentCount = attempts.filter((attempt) => attempt.outcome === "missed").length;
+        const completionAttempt = attempts.findLast((attempt) => attempt.outcome === "completed");
+
         insertTaskStmt.run(
-          `task_${serialNumber}_${randomUUID().slice(0, 8)}`,
+          taskId,
           serialNumber,
           task.title,
           task.description,
           task.notes,
           projectId,
-          task.startTime,
-          task.endTime,
+          latestAttempt.scheduledStartTime,
+          latestAttempt.scheduledEndTime,
           task.status,
           task.priority,
-          new Date(now - serialNumber * 60_000).toISOString()
+          latestAttempt.attemptNumber,
+          reassignmentCount,
+          completionAttempt?.resolvedAt ?? null,
+          taskCreatedAt
         );
+
+        attempts.forEach((attempt) => {
+          insertAttemptStmt.run(
+            attempt.id,
+            taskId,
+            attempt.attemptNumber,
+            attempt.scheduledStartTime,
+            attempt.scheduledEndTime,
+            attempt.outcome,
+            attempt.reason,
+            attempt.completionNotes,
+            attempt.reassignedStartTime,
+            attempt.reassignedEndTime,
+            attempt.createdAt,
+            attempt.resolvedAt
+          );
+        });
+
+        subtasks.forEach((subtask) => {
+          insertSubtaskStmt.run(
+            subtask.id,
+            taskId,
+            subtask.title,
+            subtask.isCompleted ? 1 : 0,
+            subtask.orderIndex,
+            subtask.createdAt,
+            subtask.completedAt
+          );
+        });
       });
     });
   });
@@ -430,4 +713,4 @@ function resetAndSeed() {
 }
 
 resetAndSeed();
-console.log(`Seeded ${projects.length} projects and 25 tasks into ${dbPath}`);
+console.log(`Seeded ${projects.length} projects and 25 tasks with attempt history into ${dbPath}`);

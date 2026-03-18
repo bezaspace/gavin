@@ -1,5 +1,31 @@
 export type TaskStatus = "pending" | "in_progress" | "completed";
 export type TaskPriority = "low" | "medium" | "high";
+export type TaskAttemptOutcome = "scheduled" | "missed" | "completed";
+
+export interface TaskSubtask {
+  id: string;
+  taskId: string;
+  title: string;
+  isCompleted: boolean;
+  orderIndex: number;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface TaskAttempt {
+  id: string;
+  taskId: string;
+  attemptNumber: number;
+  scheduledStartTime: string;
+  scheduledEndTime: string;
+  outcome: TaskAttemptOutcome;
+  reason: string;
+  completionNotes: string;
+  reassignedStartTime: string;
+  reassignedEndTime: string;
+  createdAt: string;
+  resolvedAt: string | null;
+}
 
 export interface Task {
   id: string;
@@ -14,5 +40,8 @@ export interface Task {
   endTime: string;
   status: TaskStatus;
   priority: TaskPriority;
+  currentAttemptNumber: number;
+  reassignmentCount: number;
   createdAt: string;
+  completedAt: string | null;
 }

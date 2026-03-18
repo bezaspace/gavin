@@ -82,6 +82,14 @@ export function TaskCard({ task, active = false, onClick }: TaskCardProps) {
             {statusLabels[task.status]}
           </span>
         </div>
+        <span className="text-[8px] uppercase tracking-[0.1em] text-text-dim">
+          A{task.currentAttemptNumber}
+        </span>
+        {task.reassignmentCount > 0 ? (
+          <span className="text-[8px] uppercase tracking-[0.1em] text-status-warning">
+            R{task.reassignmentCount}
+          </span>
+        ) : null}
         <span className="ml-auto font-mono text-[8px] text-text-dim opacity-50">
           {task.id.split("_").pop()}
         </span>
