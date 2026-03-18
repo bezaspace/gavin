@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { addTask, getTasks, updateTask, deleteTask } from "@/lib/tasks/store";
+import { getProject } from "@/lib/projects/store";
+import {
+  addTask,
+  deleteTask,
+  getTasks,
+  getTasksByProject,
+  updateTask,
+} from "@/lib/tasks/store";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const projectId = request.nextUrl.searchParams.get("projectId")?.trim();
+
+  if (projectId) {
+    return NextResponse.json(getTasksByProject(projectId));
+  }
+
   return NextResponse.json(getTasks());
 }
 
@@ -11,6 +24,7 @@ export async function POST(request: NextRequest) {
     const title = String(body.title ?? "").trim();
     const startTime = String(body.startTime ?? "").trim();
     const endTime = String(body.endTime ?? "").trim();
+    const projectId = body.projectId === undefined ? null : String(body.projectId).trim();
 
     if (!title || !startTime || !endTime) {
       return NextResponse.json(
@@ -19,10 +33,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (projectId && !getProject(projectId)) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
     const task = addTask({
       title,
       description: body.description ? String(body.description) : "",
       notes: body.notes ? String(body.notes) : "",
+      projectId,
       startTime,
       endTime,
       priority:
@@ -41,8 +60,19 @@ export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
     const id = String(body.id ?? "");
+    const projectId =
+      body.projectId === undefined
+        ? undefined
+        : body.projectId === null
+          ? null
+          : String(body.projectId).trim();
+
     if (!id) {
       return NextResponse.json({ error: "Task id is required" }, { status: 400 });
+    }
+
+    if (projectId && !getProject(projectId)) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     const task = updateTask(id, {
@@ -50,6 +80,7 @@ export async function PATCH(request: NextRequest) {
       description:
         body.description === undefined ? undefined : String(body.description),
       notes: body.notes === undefined ? undefined : String(body.notes),
+      projectId,
       startTime:
         body.startTime === undefined ? undefined : String(body.startTime),
       endTime: body.endTime === undefined ? undefined : String(body.endTime),

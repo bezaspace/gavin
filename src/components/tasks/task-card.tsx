@@ -26,19 +26,34 @@ const priorityColors: Record<string, string> = {
 
 interface TaskCardProps {
   task: Task;
+  active?: boolean;
+  onClick?: () => void;
 }
 
-export function TaskCard({ task }: TaskCardProps) {
+export function TaskCard({ task, active = false, onClick }: TaskCardProps) {
   return (
-    <div className="border border-[rgba(122,155,168,0.1)] bg-bg-panel px-3 py-2 hover:border-[rgba(122,155,168,0.2)] transition-colors">
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full border-[0.5px] bg-bg-panel px-3 py-2 text-left transition-colors ${
+        active
+          ? "border-accent-primary bg-[rgba(122,155,168,0.06)]"
+          : "border-[rgba(122,155,168,0.1)] hover:border-[rgba(122,155,168,0.2)]"
+      }`}
+    >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[8px] uppercase tracking-[0.15em] text-text-dim border border-[rgba(122,155,168,0.12)] px-1.5 py-0.5">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <span className="border-[0.5px] border-[rgba(122,155,168,0.12)] px-1.5 py-0.5 text-[8px] uppercase tracking-[0.15em] text-text-dim">
               #{task.serialNumber}
             </span>
             <span className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
               {task.startTime} - {task.endTime}
+            </span>
+            <span className="border-[0.5px] border-[rgba(122,155,168,0.12)] px-1.5 py-0.5 text-[8px] uppercase tracking-[0.15em] text-text-dim">
+              {task.projectTitle
+                ? `P#${task.projectSerialNumber ?? "?"} ${task.projectTitle}`
+                : "UNASSIGNED"}
             </span>
           </div>
           <div
@@ -51,31 +66,26 @@ export function TaskCard({ task }: TaskCardProps) {
             {task.title}
           </div>
           {task.description && (
-            <div className="text-[9px] text-text-dim mt-0.5">
-              {task.description}
-            </div>
-          )}
-          {task.notes && (
-            <div className="mt-1 border-l border-[rgba(122,155,168,0.15)] pl-2 text-[9px] text-text-dim whitespace-pre-wrap">
-              {task.notes}
-            </div>
+            <div className="mt-0.5 text-[9px] text-text-dim">{task.description}</div>
           )}
         </div>
-        <div className={`text-[8px] uppercase tracking-[0.1em] ${priorityColors[task.priority]} whitespace-nowrap`}>
+        <div
+          className={`whitespace-nowrap text-[8px] uppercase tracking-[0.1em] ${priorityColors[task.priority]}`}
+        >
           {priorityLabels[task.priority]}
         </div>
       </div>
-      <div className="flex items-center gap-2 mt-2">
+      <div className="mt-2 flex items-center gap-2">
         <div className="flex items-center gap-1.5">
-          <div className={`w-1.5 h-1.5 rounded-full ${statusColors[task.status]}`} />
+          <div className={`h-1.5 w-1.5 rounded-full ${statusColors[task.status]}`} />
           <span className="text-[8px] uppercase tracking-[0.1em] text-text-dim">
             {statusLabels[task.status]}
           </span>
         </div>
-        <span className="text-[8px] text-text-dim ml-auto font-mono opacity-50">
+        <span className="ml-auto font-mono text-[8px] text-text-dim opacity-50">
           {task.id.split("_").pop()}
         </span>
       </div>
-    </div>
+    </button>
   );
 }

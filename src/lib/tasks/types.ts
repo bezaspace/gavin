@@ -7,6 +7,9 @@ export interface Task {
   title: string;
   description: string;
   notes: string;
+  projectId: string | null;
+  projectTitle: string | null;
+  projectSerialNumber: number | null;
   startTime: string;
   endTime: string;
   status: TaskStatus;

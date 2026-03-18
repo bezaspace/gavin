@@ -21,11 +21,21 @@ db.exec(`
     title TEXT NOT NULL,
     description TEXT DEFAULT '',
     notes TEXT DEFAULT '',
+    project_id TEXT DEFAULT NULL,
     start_time TEXT DEFAULT '',
     end_time TEXT DEFAULT '',
     status TEXT DEFAULT 'pending',
     priority TEXT DEFAULT 'medium',
     created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS projects (
+    id TEXT PRIMARY KEY,
+    serial_number INTEGER,
+    title TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    notes TEXT DEFAULT '',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
   );
 `);
 
@@ -35,11 +45,27 @@ if (!hasColumn("tasks", "serial_number")) {
 if (!hasColumn("tasks", "notes")) {
   db.exec(`ALTER TABLE tasks ADD COLUMN notes TEXT DEFAULT ''`);
 }
+if (!hasColumn("tasks", "project_id")) {
+  db.exec(`ALTER TABLE tasks ADD COLUMN project_id TEXT DEFAULT NULL`);
+}
 if (!hasColumn("tasks", "start_time")) {
   db.exec(`ALTER TABLE tasks ADD COLUMN start_time TEXT DEFAULT ''`);
 }
 if (!hasColumn("tasks", "end_time")) {
   db.exec(`ALTER TABLE tasks ADD COLUMN end_time TEXT DEFAULT ''`);
+}
+
+if (!hasColumn("projects", "serial_number")) {
+  db.exec(`ALTER TABLE projects ADD COLUMN serial_number INTEGER`);
+}
+if (!hasColumn("projects", "description")) {
+  db.exec(`ALTER TABLE projects ADD COLUMN description TEXT DEFAULT ''`);
+}
+if (!hasColumn("projects", "notes")) {
+  db.exec(`ALTER TABLE projects ADD COLUMN notes TEXT DEFAULT ''`);
+}
+if (!hasColumn("projects", "updated_at")) {
+  db.exec(`ALTER TABLE projects ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''`);
 }
 
 const serials = db
@@ -77,6 +103,9 @@ if (serials.length > 0) {
 db.exec(`
   CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_serial_number ON tasks(serial_number);
   CREATE INDEX IF NOT EXISTS idx_created_at ON tasks(created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id);
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_serial_number ON projects(serial_number);
+  CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC);
 `);
 
 export { db };

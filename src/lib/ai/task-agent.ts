@@ -2,6 +2,36 @@ import { tool } from "ai";
 import { z } from "zod";
 import { model } from "./provider";
 import * as taskStore from "@/lib/tasks/store";
+import { getProjects } from "@/lib/projects/store";
+
+function resolveProjectId(projectReference?: string) {
+  const value = projectReference?.trim();
+  if (!value) return null;
+
+  const projects = getProjects();
+  const normalized = value.toLowerCase();
+  const serial = normalized.replace(/^#/, "");
+
+  const exactSerialMatch = projects.find(
+    (project) => String(project.serialNumber) === serial
+  );
+  if (exactSerialMatch) return exactSerialMatch.id;
+
+  const exactTitleMatch = projects.find(
+    (project) => project.title.trim().toLowerCase() === normalized
+  );
+  if (exactTitleMatch) return exactTitleMatch.id;
+
+  const partialTitleMatch = projects.find((project) =>
+    project.title.trim().toLowerCase().includes(normalized)
+  );
+  return partialTitleMatch?.id ?? null;
+}
+
+function formatProjectLabel(projectTitle: string | null, projectSerialNumber: number | null) {
+  if (!projectTitle) return "unassigned";
+  return `project #${projectSerialNumber ?? "?"} ${projectTitle}`;
+}
 
 export const createTaskTool = tool({
   description:
@@ -26,17 +56,35 @@ export const createTaskTool = tool({
       .enum(["low", "medium", "high"])
       .optional()
       .describe("Task priority (default: medium)"),
+    projectReference: z
+      .string()
+      .optional()
+      .describe("Optional project title or serial number like 'Apollo' or '#3'"),
   }),
-  execute: async ({ title, description, notes, startTime, endTime, priority }) => {
+  execute: async ({
+    title,
+    description,
+    notes,
+    startTime,
+    endTime,
+    priority,
+    projectReference,
+  }) => {
+    const projectId = resolveProjectId(projectReference);
+    if (projectReference && !projectId) {
+      return `Error: Project "${projectReference}" not found.`;
+    }
+
     const task = taskStore.addTask({
       title,
       description,
       notes,
+      projectId,
       startTime,
       endTime,
       priority,
     });
-    return `Task created: #${task.serialNumber} "${task.title}" [${task.id}] from ${task.startTime} to ${task.endTime} with priority ${task.priority}`;
+    return `Task created: #${task.serialNumber} "${task.title}" [${task.id}] from ${task.startTime} to ${task.endTime} with priority ${task.priority} on ${formatProjectLabel(task.projectTitle, task.projectSerialNumber)}`;
   },
 });
 
@@ -58,11 +106,30 @@ export const updateTaskTool = tool({
       .enum(["low", "medium", "high"])
       .optional()
       .describe("New priority"),
+    projectReference: z
+      .string()
+      .nullable()
+      .optional()
+      .describe("New project title or serial number, or null to clear project assignment"),
   }),
-  execute: async ({ id, ...data }) => {
-    const updated = taskStore.updateTask(id, data);
+  execute: async ({ id, projectReference, ...data }) => {
+    const resolvedProjectId =
+      projectReference === undefined
+        ? undefined
+        : projectReference === null
+          ? null
+          : resolveProjectId(projectReference);
+
+    if (projectReference && resolvedProjectId === null) {
+      return `Error: Project "${projectReference}" not found.`;
+    }
+
+    const updated = taskStore.updateTask(id, {
+      ...data,
+      projectId: resolvedProjectId,
+    });
     if (!updated) return `Error: Task with ID "${id}" not found.`;
-    return `Task updated: #${updated.serialNumber} "${updated.title}" [${updated.id}] — status: ${updated.status}, priority: ${updated.priority}`;
+    return `Task updated: #${updated.serialNumber} "${updated.title}" [${updated.id}] — status: ${updated.status}, priority: ${updated.priority}, ${formatProjectLabel(updated.projectTitle, updated.projectSerialNumber)}`;
   },
 });
 
@@ -88,7 +155,7 @@ export const listTasksTool = tool({
     return tasks
       .map(
         (t) =>
-          `#${t.serialNumber} [${t.id}] ${t.title} — ${t.startTime} to ${t.endTime}, status: ${t.status}, priority: ${t.priority}${t.notes ? ` | notes: ${t.notes}` : ""}${t.description ? ` | ${t.description}` : ""}`
+          `#${t.serialNumber} [${t.id}] ${t.title} — ${t.startTime} to ${t.endTime}, status: ${t.status}, priority: ${t.priority}, ${formatProjectLabel(t.projectTitle, t.projectSerialNumber)}${t.notes ? ` | notes: ${t.notes}` : ""}${t.description ? ` | ${t.description}` : ""}`
       )
       .join("\n");
   },
@@ -111,6 +178,7 @@ Rules:
 - Match the technical tone of the interface.
 - When creating a task, collect a start time and an end time. If either is missing, ask a follow-up question instead of creating the task.
 - Include notes when the user provides them.
+- If the user mentions a project, attach the task to the matching project by title or serial number.
 - Don't create duplicate tasks — check existing tasks if unsure.
 - If the user just chats casually without mentioning tasks, respond conversationally without creating tasks.`;
 

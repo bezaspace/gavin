@@ -6,6 +6,7 @@ import { DefaultChatTransport } from "ai";
 import { Message } from "./message";
 import { ChatInput } from "./chat-input";
 import { onTasksChanged } from "@/components/tasks/task-panel";
+import { onProjectsChanged } from "@/components/projects/project-panel";
 
 export function ChatPanel() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -15,6 +16,7 @@ export function ChatPanel() {
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     onFinish: () => {
       onTasksChanged();
+      onProjectsChanged();
     },
   });
 
