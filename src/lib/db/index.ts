@@ -41,6 +41,12 @@ db.exec(`
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS brain_dump_entries (
+    id TEXT PRIMARY KEY,
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
   CREATE TABLE IF NOT EXISTS task_attempts (
     id TEXT PRIMARY KEY,
     task_id TEXT NOT NULL,
@@ -220,6 +226,8 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id);
   CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_serial_number ON projects(serial_number);
   CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_brain_dump_entries_created_at
+    ON brain_dump_entries(created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_task_attempts_task_id ON task_attempts(task_id);
   CREATE UNIQUE INDEX IF NOT EXISTS idx_task_attempts_task_attempt
     ON task_attempts(task_id, attempt_number);

@@ -35,25 +35,21 @@ export function ChatPanel() {
   }, [messages]);
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-      <div className="border-b border-[rgba(122,155,168,0.1)] px-4 py-3 shrink-0">
-        <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-          {"// Chat Terminal"}
-        </div>
-      </div>
-
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto p-4 space-y-3">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-transparent">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-6 py-6 space-y-6">
         {messages.length === 0 && (
-          <div className="text-text-dim text-[11px] text-center py-12">
-            <div className="text-[8px] uppercase tracking-[0.15em] mb-2">
-              Gavin Terminal v0.1
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <div className="text-[8px] uppercase tracking-[0.3em] text-text-dim mb-4 opacity-40">
+              GAVIN_SYSTEM_READY_V0.1
             </div>
-            <p>
-              Ready. Describe your tasks in natural language.
-            </p>
-            <p className="mt-1">
-              Try: &quot;I need to finish the report by Friday&quot;
-            </p>
+            <div className="max-w-xs space-y-2">
+              <p className="text-[11px] text-text-dim leading-relaxed">
+                Awaiting natural language directives. Initialize sequence by describing operational requirements.
+              </p>
+              <p className="text-[9px] text-accent-primary opacity-40 uppercase tracking-[0.1em]">
+                Example: &quot;Schedule system audit for Friday 14:00&quot;
+              </p>
+            </div>
           </div>
         )}
         {messages.map((message) => (
@@ -61,19 +57,22 @@ export function ChatPanel() {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="text-[9px] text-text-dim animate-pulse">
-              ▸ Processing...
+            <div className="flex items-center gap-2 text-[8px] uppercase tracking-[0.2em] text-accent-primary animate-pulse">
+              <span>▸</span>
+              <span>Processing_Data_Stream</span>
             </div>
           </div>
         )}
       </div>
 
-      <ChatInput
-        value={input}
-        onChange={setInput}
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
+      <div className="px-6 pb-6">
+        <ChatInput
+          value={input}
+          onChange={setInput}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 }

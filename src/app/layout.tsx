@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AppNav } from "@/components/navigation/app-nav";
+import { BrainDumpCapture } from "@/components/brain-dump/brain-dump-capture";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
@@ -25,6 +26,7 @@ export default function RootLayout({
         <div className="flex h-screen flex-col overflow-hidden">
           <AppNav />
           <main className="flex flex-col flex-1 min-h-0 overflow-hidden">{children}</main>
+          <BrainDumpCapture />
         </div>
       </body>
     </html>

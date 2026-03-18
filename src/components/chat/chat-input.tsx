@@ -25,25 +25,30 @@ export function ChatInput({ value, onChange, onSubmit, isLoading }: ChatInputPro
   }
 
   return (
-    <div className="shrink-0 border-t border-[rgba(122,155,168,0.1)] px-4 py-4 bg-[rgba(10,12,14,0.4)]">
-      <form onSubmit={handleFormSubmit} className="flex gap-3 items-end w-full">
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask Gavin to create tasks, break them into subtasks, or suggest a checklist..."
-          rows={1}
-          className="flex-1 bg-transparent border border-[rgba(122,155,168,0.2)] px-4 py-3 text-[12px] text-text-primary placeholder:text-text-dim resize-none outline-none focus:border-accent-primary transition-colors min-h-[44px] max-h-[160px] rounded-none"
-          style={{ lineHeight: "1.5" }}
-          disabled={isLoading}
-        />
-        <button
-          type="submit"
-          disabled={!value.trim() || isLoading}
-          className="border border-[rgba(122,155,168,0.2)] px-6 py-3 text-[9px] uppercase tracking-[0.18em] text-text-primary hover:border-accent-primary hover:text-text-bright transition-all disabled:opacity-20 disabled:cursor-not-allowed whitespace-nowrap bg-[rgba(122,155,168,0.02)] hover:bg-[rgba(122,155,168,0.06)]"
-        >
-          {isLoading ? "Processing..." : "Send"}
-        </button>
+    <div className="shrink-0 bg-transparent">
+      <form onSubmit={handleFormSubmit} className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-2">
+          <label className="text-[8px] uppercase tracking-[0.2em] text-text-dim">Operational_Input</label>
+          <div className="flex gap-4 items-end">
+            <textarea
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Initialize operational directive..."
+              rows={1}
+              className="flex-1 bg-transparent border-b-[0.5px] border-[rgba(122,155,168,0.2)] pb-2 text-[12px] text-text-primary placeholder:text-text-dim/40 resize-none outline-none focus:border-accent-primary transition-colors min-h-[32px] max-h-[160px] rounded-none"
+              style={{ lineHeight: "1.5" }}
+              disabled={isLoading}
+            />
+            <button
+              type="submit"
+              disabled={!value.trim() || isLoading}
+              className="px-6 py-2 text-[10px] uppercase tracking-[0.2em] text-accent-primary hover:text-text-bright transition-all disabled:opacity-20 disabled:cursor-not-allowed whitespace-nowrap bg-transparent"
+            >
+              {isLoading ? "EXEC..." : "[SEND_LINK]"}
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );

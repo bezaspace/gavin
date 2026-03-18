@@ -414,28 +414,8 @@ export function TaskPanel() {
 
   return (
     <div className="flex h-full min-h-0">
-      <section className="flex min-w-0 flex-[0_0_420px] flex-col border-r-[0.5px] border-[rgba(122,155,168,0.1)]">
-        <div className="border-b-[0.5px] border-[rgba(122,155,168,0.1)] px-4 py-3">
-          <div className="mb-2 text-[8px] uppercase tracking-[0.15em] text-text-dim">
-            {"// Task Queue"}
-          </div>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-text-dim" />
-              <span className="text-[9px] text-text-dim">{pending} pending</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-status-warning" />
-              <span className="text-[9px] text-text-dim">{active} active</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-status-success" />
-              <span className="text-[9px] text-text-dim">{done} done</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2 overflow-y-auto p-3">
+      <section className="flex min-w-0 flex-[0_0_420px] flex-col border-r-[0.5px] border-[rgba(122,155,168,0.15)]">
+        <div className="overflow-y-auto">
           {tasks.length === 0 && (
             <div className="py-8 text-center text-[10px] text-text-dim">
               <div className="mb-1 text-[8px] uppercase tracking-[0.15em]">No Tasks</div>
@@ -453,8 +433,8 @@ export function TaskPanel() {
         </div>
       </section>
 
-      <section className="flex min-w-0 flex-1 flex-col">
-        <div className="border-b-[0.5px] border-[rgba(122,155,168,0.1)] px-4 py-3">
+      <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="border-b-[0.5px] border-[rgba(122,155,168,0.15)] px-6 py-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
@@ -462,18 +442,27 @@ export function TaskPanel() {
               </div>
               {activeTask ? (
                 <>
-                  <div className="mt-1 text-[18px] font-light tracking-normal text-text-bright">
+                  <div className="mt-2 text-[24px] font-light tracking-[-0.01em] text-text-bright">
                     {activeTask.title}
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                    <span>#{activeTask.serialNumber}</span>
-                    <span>
-                      Attempt {activeTask.currentAttemptNumber} / {activeTask.reassignmentCount + 1}
+                  <div className="mt-2 flex flex-wrap items-center gap-4 text-[8px] uppercase tracking-[0.15em] text-text-dim">
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-accent-primary opacity-60">ID:</span>
+                      <span className="text-text-bright">#{activeTask.serialNumber}</span>
                     </span>
-                    <span>
-                      {activeTask.projectTitle
-                        ? `P#${activeTask.projectSerialNumber ?? "?"} ${activeTask.projectTitle}`
-                        : "UNASSIGNED"}
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-accent-primary opacity-60">ATTEMPT:</span>
+                      <span className="text-text-bright">
+                        {activeTask.currentAttemptNumber} / {activeTask.reassignmentCount + 1}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-accent-primary opacity-60">PROJECT:</span>
+                      <span className="text-text-bright">
+                        {activeTask.projectTitle
+                          ? `P#${activeTask.projectSerialNumber ?? "?"} ${activeTask.projectTitle}`
+                          : "UNASSIGNED"}
+                      </span>
                     </span>
                   </div>
                 </>
@@ -484,7 +473,7 @@ export function TaskPanel() {
               <button
                 type="button"
                 onClick={startEditingNotes}
-                className="border-[0.5px] border-border-subtle bg-transparent px-3 py-2 text-[10px] uppercase tracking-[0.1em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
+                className="border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary"
               >
                 Edit notes
               </button>
@@ -492,82 +481,85 @@ export function TaskPanel() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-3">
+        <div className="flex-1 overflow-y-auto px-6 py-5">
           {activeTask ? (
-            <div className="space-y-5">
-              <div className="grid gap-3 border-[0.5px] border-border-subtle p-3 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
+            <div className="space-y-8">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-6 lg:grid-cols-4">
+                <div className="col-span-2 lg:col-span-4 border-b-[0.5px] border-border-subtle pb-4">
                   <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Description</div>
-                  <div className="mt-1 text-[11px] leading-6 text-text-primary">
+                  <div className="mt-2 text-[11px] leading-relaxed text-text-primary max-w-3xl">
                     {activeTask.description.trim() || "No description yet."}
                   </div>
                 </div>
+                
+                <div>
+                  <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Status</div>
+                  <div className="mt-1 flex items-center gap-2">
+                    <div className={`h-1.5 w-1.5 rounded-full ${
+                      activeTask.status === 'completed' ? 'bg-status-success' :
+                      activeTask.status === 'in_progress' ? 'bg-status-warning animate-pulse' : 'bg-text-dim'
+                    }`} />
+                    <div className="text-[11px] text-text-bright uppercase tracking-[0.05em]">{activeTask.status.replace('_', ' ')}</div>
+                  </div>
+                </div>
+                
                 <div>
                   <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Current slot</div>
-                  <div className="mt-1 text-[11px] text-text-bright">
+                  <div className="mt-1 text-[11px] text-text-bright tabular-nums">
                     {activeTask.startTime} - {activeTask.endTime}
                   </div>
                 </div>
-                <div>
-                  <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Status</div>
-                  <div className="mt-1 text-[11px] text-text-bright">{activeTask.status}</div>
-                </div>
+
                 <div>
                   <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Priority</div>
-                  <div className="mt-1 text-[11px] text-text-bright">{activeTask.priority}</div>
+                  <div className="mt-1 text-[11px] text-text-bright uppercase">{activeTask.priority}</div>
                 </div>
-                <div>
-                  <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Reassignments</div>
-                  <div className="mt-1 text-[11px] text-text-bright">{activeTask.reassignmentCount}</div>
-                </div>
+
                 <div>
                   <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Created</div>
                   <div className="mt-1 text-[11px] tabular-nums text-text-bright">
                     {formatTimestamp(activeTask.createdAt)}
                   </div>
                 </div>
-                <div>
-                  <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Completed</div>
-                  <div className="mt-1 text-[11px] tabular-nums text-text-bright">
-                    {formatTimestamp(activeTask.completedAt)}
-                  </div>
-                </div>
               </div>
 
-              <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-                <div className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                      Notes
-                    </label>
+              <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
+                <div className="space-y-8">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b-[0.5px] border-border-subtle pb-2">
+                      <label className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
+                        Notes
+                      </label>
+                      {isEditingNotes && (
+                        <span className="text-[8px] uppercase tracking-[0.1em] text-accent-primary animate-pulse">EDITING</span>
+                      )}
+                    </div>
                     {isEditingNotes ? (
                       <textarea
                         rows={12}
                         value={draft.notes}
                         onChange={(event) => setDraft({ notes: event.target.value })}
                         placeholder="Task notes"
-                        className="w-full resize-none border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[6px] text-[11px] leading-6 text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
+                        className="w-full resize-none border-[0.5px] border-border-subtle bg-[rgba(122,155,168,0.02)] px-[10px] py-[6px] text-[11px] leading-relaxed text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
                       />
                     ) : (
-                      <div className="min-h-[240px] whitespace-pre-wrap border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[6px] text-[11px] leading-6 text-text-primary">
+                      <div className="min-h-[200px] whitespace-pre-wrap text-[11px] leading-relaxed text-text-primary">
                         {activeTask.notes.trim() || "No notes yet."}
                       </div>
                     )}
                   </div>
 
-                  <div className="space-y-2 border-[0.5px] border-border-subtle p-3">
-                    <div className="flex items-center justify-between gap-3">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between border-b-[0.5px] border-border-subtle pb-2">
                       <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
                         Subtasks
                       </div>
                       <div className="text-[8px] uppercase tracking-[0.12em] text-text-dim">
-                        {subtasks.filter((subtask) => subtask.isCompleted).length}/{subtasks.length} done
+                        {subtasks.filter((subtask) => subtask.isCompleted).length}/{subtasks.length} COMPLETE
                       </div>
                     </div>
-                    <div className="text-[8px] uppercase tracking-[0.12em] text-text-dim">
-                      Drag rows to reorder.
-                    </div>
-                    <div className="mt-3 flex gap-2">
+                    
+                    <div className="flex gap-2">
                       <input
                         value={newSubtaskTitle}
                         onChange={(event) => setNewSubtaskTitle(event.target.value)}
@@ -577,22 +569,23 @@ export function TaskPanel() {
                             void createSubtask();
                           }
                         }}
-                        placeholder="Add a subtask"
-                        className="w-full border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[8px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
+                        placeholder="Add subtask..."
+                        className="w-full border-b-[0.5px] border-border-subtle bg-transparent px-[10px] py-[8px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary transition-colors"
                       />
                       <button
                         type="button"
                         onClick={createSubtask}
                         disabled={isCreatingSubtask || !newSubtaskTitle.trim()}
-                        className="border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-accent-primary"
+                        className="border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[8px] uppercase tracking-[0.15em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-30"
                       >
-                        {isCreatingSubtask ? "Adding..." : "Add"}
+                        {isCreatingSubtask ? "..." : "ADD"}
                       </button>
                     </div>
-                    <div className="mt-3 space-y-2">
+
+                    <div className="space-y-px">
                       {subtasks.length === 0 ? (
-                        <div className="border-[0.5px] border-border-subtle bg-bg-primary px-3 py-3 text-[10px] text-text-dim">
-                          No subtasks yet.
+                        <div className="py-4 text-[10px] text-text-dim uppercase tracking-[0.05em]">
+                          No subtasks defined.
                         </div>
                       ) : (
                         subtasks.map((subtask) => {
@@ -605,22 +598,22 @@ export function TaskPanel() {
                               onDragOver={(event) => event.preventDefault()}
                               onDrop={() => void moveSubtask(subtask.id)}
                               onDragEnd={() => setDraggedSubtaskId(null)}
-                              className="flex items-center gap-3 border-[0.5px] border-border-subtle bg-bg-primary px-3 py-2"
+                              className="group flex items-center gap-3 border-b-[0.5px] border-[rgba(122,155,168,0.05)] bg-transparent py-2 transition hover:bg-[rgba(122,155,168,0.02)]"
                             >
-                              <div className="cursor-grab text-[10px] text-text-dim">::</div>
-                              <label className="flex min-w-0 flex-1 items-center gap-3">
+                              <div className="cursor-grab text-[10px] text-text-dim opacity-30 group-hover:opacity-100 transition-opacity">::</div>
+                              <label className="flex min-w-0 flex-1 items-center gap-3 cursor-pointer">
                                 <input
                                   type="checkbox"
                                   checked={subtask.isCompleted}
                                   onChange={() => void toggleSubtask(subtask)}
                                   disabled={isPending}
-                                  className="h-4 w-4 border-border-subtle bg-bg-primary accent-[var(--color-accent-primary)]"
+                                  className="h-3 w-3 border-border-subtle bg-bg-primary accent-accent-primary"
                                 />
                                 <span
-                                  className={`text-[11px] leading-6 ${
+                                  className={`text-[11px] transition-colors ${
                                     subtask.isCompleted
                                       ? "text-text-dim line-through"
-                                      : "text-text-primary"
+                                      : "text-text-primary group-hover:text-text-bright"
                                   }`}
                                 >
                                   {subtask.title}
@@ -630,9 +623,9 @@ export function TaskPanel() {
                                 type="button"
                                 onClick={() => void deleteSubtask(subtask.id)}
                                 disabled={isPending}
-                                className="border-[0.5px] border-status-error bg-transparent px-2 py-1 text-[8px] uppercase tracking-[0.1em] text-status-error transition hover:bg-status-error hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-status-error"
+                                className="opacity-0 group-hover:opacity-100 text-[8px] uppercase tracking-[0.15em] text-status-error transition-opacity hover:text-status-error/80 disabled:opacity-0"
                               >
-                                Delete
+                                [DELETE]
                               </button>
                             </div>
                           );
@@ -641,41 +634,39 @@ export function TaskPanel() {
                     </div>
                   </div>
 
-                  <div className="space-y-2 border-[0.5px] border-border-subtle p-3">
-                    <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                      History
+                  <div className="space-y-4">
+                    <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim border-b-[0.5px] border-border-subtle pb-2">
+                      Mission History
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       {attempts.map((attempt) => (
                         <div
                           key={attempt.id}
-                          className="border-[0.5px] border-border-subtle bg-bg-primary px-3 py-2"
+                          className="border-l-[0.5px] border-border-subtle pl-4 py-1"
                         >
-                          <div className="flex flex-wrap items-center gap-2 text-[8px] uppercase tracking-[0.14em] text-text-dim">
-                            <span>Attempt {attempt.attemptNumber}</span>
-                            <span>{formatOutcome(attempt.outcome)}</span>
-                            <span>
+                          <div className="flex flex-wrap items-center gap-3 text-[8px] uppercase tracking-[0.15em]">
+                            <span className="text-text-bright">Attempt {attempt.attemptNumber}</span>
+                            <span className={
+                              attempt.outcome === 'completed' ? 'text-status-success' :
+                              attempt.outcome === 'missed' ? 'text-status-error' : 'text-status-warning'
+                            }>{formatOutcome(attempt.outcome)}</span>
+                            <span className="text-text-dim tabular-nums">
                               {attempt.scheduledStartTime} - {attempt.scheduledEndTime}
                             </span>
                           </div>
                           {attempt.reason ? (
-                            <div className="mt-2 text-[11px] leading-6 text-text-primary">
-                              Reason: {attempt.reason}
+                            <div className="mt-2 text-[10px] leading-relaxed text-text-dim italic">
+                              &quot;{attempt.reason}&quot;
                             </div>
                           ) : null}
                           {attempt.completionNotes ? (
-                            <div className="mt-2 whitespace-pre-wrap text-[11px] leading-6 text-text-primary">
-                              Notes: {attempt.completionNotes}
+                            <div className="mt-2 text-[11px] leading-relaxed text-text-primary border-t-[0.5px] border-[rgba(122,155,168,0.05)] pt-2">
+                              {attempt.completionNotes}
                             </div>
                           ) : null}
-                          {attempt.reassignedStartTime && attempt.reassignedEndTime ? (
-                            <div className="mt-2 text-[9px] uppercase tracking-[0.12em] text-text-dim">
-                              Reassigned to {attempt.reassignedStartTime} - {attempt.reassignedEndTime}
-                            </div>
-                          ) : null}
-                          <div className="mt-2 text-[9px] uppercase tracking-[0.12em] text-text-dim">
-                            Created {formatTimestamp(attempt.createdAt)}
-                            {attempt.resolvedAt ? ` | Resolved ${formatTimestamp(attempt.resolvedAt)}` : ""}
+                          <div className="mt-2 text-[8px] uppercase tracking-[0.12em] text-text-dim opacity-50">
+                            LOGGED {formatTimestamp(attempt.createdAt)}
+                            {attempt.resolvedAt ? ` // RESOLVED ${formatTimestamp(attempt.resolvedAt)}` : ""}
                           </div>
                         </div>
                       ))}
@@ -683,155 +674,157 @@ export function TaskPanel() {
                   </div>
                 </div>
 
-                <div className="space-y-5">
-                  <div className="border-[0.5px] border-border-subtle p-3">
+                <div className="space-y-8">
+                  <div className="space-y-4 border-t-[0.5px] border-border-subtle pt-4 xl:border-t-0 xl:pt-0">
                     <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                      Complete task
+                      Status Update
                     </div>
-                    <div className="mt-3 text-[10px] leading-5 text-text-dim">
-                      Log how you completed the current attempt.
-                    </div>
-                    <textarea
-                      rows={8}
-                      value={completionDraft.completionNotes}
-                      onChange={(event) =>
-                        setCompletionDraft({ completionNotes: event.target.value })
-                      }
-                      placeholder="What did you do to complete this task?"
-                      disabled={activeTask.status === "completed"}
-                      className="mt-3 w-full resize-none border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[6px] text-[11px] leading-6 text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary disabled:opacity-50"
-                    />
-                    <button
-                      type="button"
-                      onClick={completeTask}
-                      disabled={
-                        isCompleting ||
-                        activeTask.status === "completed" ||
-                        !completionDraft.completionNotes.trim()
-                      }
-                      className="mt-3 w-full border-[0.5px] border-status-success bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-status-success transition hover:bg-status-success hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-status-success"
-                    >
-                      {isCompleting ? "Logging completion..." : "Mark completed"}
-                    </button>
-                  </div>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="text-[8px] uppercase tracking-[0.1em] text-text-dim opacity-60">Completion Log</div>
+                        <textarea
+                          rows={6}
+                          value={completionDraft.completionNotes}
+                          onChange={(event) =>
+                            setCompletionDraft({ completionNotes: event.target.value })
+                          }
+                          placeholder="Summary of actions taken..."
+                          disabled={activeTask.status === "completed"}
+                          className="w-full resize-none border-[0.5px] border-border-subtle bg-[rgba(122,155,168,0.02)] px-[10px] py-[6px] text-[11px] leading-relaxed text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary disabled:opacity-20 transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={completeTask}
+                          disabled={
+                            isCompleting ||
+                            activeTask.status === "completed" ||
+                            !completionDraft.completionNotes.trim()
+                          }
+                          className="w-full border-[0.5px] border-status-success bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.15em] text-status-success transition hover:bg-status-success hover:text-bg-primary disabled:opacity-30"
+                        >
+                          {isCompleting ? "Processing..." : "Commit Completion"}
+                        </button>
+                      </div>
 
-                  <div className="border-[0.5px] border-border-subtle p-3">
-                    <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                      Missed slot
-                    </div>
-                    <div className="mt-3 space-y-3">
-                      <textarea
-                        rows={5}
-                        value={rescheduleDraft.reason}
-                        onChange={(event) =>
-                          setRescheduleDraft((current) => ({
-                            ...current,
-                            reason: event.target.value,
-                          }))
-                        }
-                        placeholder="Why were you not able to do this task in the assigned slot?"
-                        disabled={activeTask.status === "completed"}
-                        className="w-full resize-none border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[6px] text-[11px] leading-6 text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary disabled:opacity-50"
-                      />
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <input
-                          value={rescheduleDraft.newStartTime}
+                      <div className="space-y-3 pt-4 border-t-[0.5px] border-border-subtle">
+                        <div className="text-[8px] uppercase tracking-[0.1em] text-text-dim opacity-60">Slot Reschedule</div>
+                        <textarea
+                          rows={4}
+                          value={rescheduleDraft.reason}
                           onChange={(event) =>
                             setRescheduleDraft((current) => ({
                               ...current,
-                              newStartTime: event.target.value,
+                              reason: event.target.value,
                             }))
                           }
-                          placeholder="New start time"
+                          placeholder="Reason for slot deviation..."
                           disabled={activeTask.status === "completed"}
-                          className="w-full border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[8px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary disabled:opacity-50"
+                          className="w-full resize-none border-[0.5px] border-border-subtle bg-[rgba(122,155,168,0.02)] px-[10px] py-[6px] text-[11px] leading-relaxed text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary disabled:opacity-20 transition-all"
                         />
-                        <input
-                          value={rescheduleDraft.newEndTime}
-                          onChange={(event) =>
-                            setRescheduleDraft((current) => ({
-                              ...current,
-                              newEndTime: event.target.value,
-                            }))
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <input
+                            value={rescheduleDraft.newStartTime}
+                            onChange={(event) =>
+                              setRescheduleDraft((current) => ({
+                                ...current,
+                                newStartTime: event.target.value,
+                              }))
+                            }
+                            placeholder="START (e.g. 14:00)"
+                            disabled={activeTask.status === "completed"}
+                            className="w-full border-b-[0.5px] border-border-subtle bg-transparent px-[10px] py-[8px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary disabled:opacity-20"
+                          />
+                          <input
+                            value={rescheduleDraft.newEndTime}
+                            onChange={(event) =>
+                              setRescheduleDraft((current) => ({
+                                ...current,
+                                newEndTime: event.target.value,
+                              }))
+                            }
+                            placeholder="END (e.g. 15:30)"
+                            disabled={activeTask.status === "completed"}
+                            className="w-full border-b-[0.5px] border-border-subtle bg-transparent px-[10px] py-[8px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary disabled:opacity-20"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={rescheduleTask}
+                          disabled={
+                            isRescheduling ||
+                            activeTask.status === "completed" ||
+                            !rescheduleDraft.reason.trim() ||
+                            !rescheduleDraft.newStartTime.trim() ||
+                            !rescheduleDraft.newEndTime.trim()
                           }
-                          placeholder="New end time"
-                          disabled={activeTask.status === "completed"}
-                          className="w-full border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[8px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary disabled:opacity-50"
-                        />
+                          className="w-full border-[0.5px] border-status-warning bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.15em] text-status-warning transition hover:bg-status-warning hover:text-bg-primary disabled:opacity-30"
+                        >
+                          {isRescheduling ? "Updating..." : "Execute Reschedule"}
+                        </button>
                       </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={rescheduleTask}
-                      disabled={
-                        isRescheduling ||
-                        activeTask.status === "completed" ||
-                        !rescheduleDraft.reason.trim() ||
-                        !rescheduleDraft.newStartTime.trim() ||
-                        !rescheduleDraft.newEndTime.trim()
-                      }
-                      className="mt-3 w-full border-[0.5px] border-status-warning bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-status-warning transition hover:bg-status-warning hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-status-warning"
-                    >
-                      {isRescheduling ? "Reassigning..." : "Reassign time slot"}
-                    </button>
-                  </div>
 
-                  {activeTask.status === "completed" ? (
-                    <div className="border-[0.5px] border-border-subtle p-3">
-                      <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                        Reopen task
-                      </div>
-                      <button
-                        type="button"
-                        onClick={reopenTask}
-                        disabled={isReopening}
-                        className="mt-3 w-full border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-accent-primary"
-                      >
-                        {isReopening ? "Reopening..." : "Reopen as pending"}
-                      </button>
+                      {activeTask.status === "completed" ? (
+                        <div className="pt-4 border-t-[0.5px] border-border-subtle">
+                          <button
+                            type="button"
+                            onClick={reopenTask}
+                            disabled={isReopening}
+                            className="w-full border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.15em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-30"
+                          >
+                            {isReopening ? "REOPENING..." : "REOPEN TASK"}
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-col-reverse gap-3 border-t-[0.5px] border-border-subtle pt-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col-reverse gap-6 border-t-[0.5px] border-[rgba(122,155,168,0.15)] pt-8 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
                   onClick={deleteTask}
                   disabled={isDeleting}
-                  className="border-[0.5px] border-status-error bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-status-error transition hover:bg-status-error hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-status-error"
+                  className="text-[8px] uppercase tracking-[0.2em] text-status-error opacity-50 hover:opacity-100 transition-opacity disabled:opacity-20"
                 >
-                  {isDeleting ? "Deleting..." : "Delete task"}
+                  {isDeleting ? "DELETING_TASK..." : "[ PERMANENT_DELETE ]"}
                 </button>
 
                 {isEditingNotes ? (
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-3">
                     <button
                       type="button"
                       onClick={cancelEditingNotes}
-                      className="border-[0.5px] border-border-subtle bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
+                      className="border-[0.5px] border-border-subtle bg-transparent px-6 py-2 text-[10px] uppercase tracking-[0.15em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
                     >
-                      Cancel
+                      ABORT
                     </button>
                     <button
                       type="button"
                       onClick={saveTaskNotes}
                       disabled={isSavingNotes || !hasDraftChanges}
-                      className="border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-accent-primary"
+                      className="border-[0.5px] border-accent-primary bg-transparent px-6 py-2 text-[10px] uppercase tracking-[0.15em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-30"
                     >
-                      {isSavingNotes ? "Saving..." : "Save notes"}
+                      {isSavingNotes ? "SAVING..." : "SAVE_NOTES"}
                     </button>
                   </div>
                 ) : currentAttempt ? (
-                  <div className="text-[9px] uppercase tracking-[0.12em] text-text-dim">
-                    Current attempt: {currentAttempt.scheduledStartTime} - {currentAttempt.scheduledEndTime}
+                  <div className="text-[9px] uppercase tracking-[0.15em] text-text-dim flex items-center gap-2">
+                    <span className="h-1 w-1 rounded-full bg-accent-primary animate-pulse" />
+                    LIVE ATTEMPT: {currentAttempt.scheduledStartTime} - {currentAttempt.scheduledEndTime}
                   </div>
                 ) : null}
               </div>
             </div>
           ) : (
-            <div className="flex h-full min-h-[320px] items-center justify-center border-[0.5px] border-border-subtle px-6 text-center text-[11px] text-text-dim">
-              Select a task from the queue to view its details.
+            <div className="flex h-full min-h-[400px] flex-col items-center justify-center text-center">
+              <div className="text-[8px] uppercase tracking-[0.2em] text-text-dim animate-pulse">
+                Awaiting Task Selection
+              </div>
+              <div className="mt-4 max-w-[240px] text-[10px] text-text-dim/60 leading-relaxed">
+                Select a sequence from the left queue to initialize detailed view.
+              </div>
             </div>
           )}
         </div>

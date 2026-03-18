@@ -387,57 +387,38 @@ export function ProjectPanel() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden border-[0.5px] border-border-subtle bg-bg-panel">
-      <div className="border-b-[0.5px] border-border-subtle px-4 py-2">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-              {"// Projects"}
-            </div>
-            <h1 className="mt-1 text-[24px] font-light tracking-[-0.01em] text-text-bright">
-              Simple project board
-            </h1>
-            <p className="mt-1 max-w-2xl text-[11px] leading-6 text-text-dim">
-              Open any card to view the full project, update the details, or remove it. New
-              projects start from the small create button and open in their own modal.
-            </p>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-transparent">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-baseline gap-2 text-[11px] tabular-nums">
+            <span className="text-[8px] uppercase tracking-[0.15em] text-text-dim">REGISTRY_SIZE</span>
+            <span className="text-text-bright">{projects.length}</span>
           </div>
-
-          <div className="flex items-center gap-4 self-start pt-1">
-            <div className="flex items-baseline gap-2 text-[11px] tabular-nums">
-              <span className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Total</span>
-              <span className="text-text-bright">{projects.length}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsCreateOpen(true)}
-              className="border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary"
-            >
-              Create project
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsCreateOpen(true)}
+            className="border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.15em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary"
+          >
+            Initialize Project
+          </button>
         </div>
-      </div>
-
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {projects.length === 0 ? (
-          <div className="flex min-h-[320px] flex-col items-center justify-center border-[0.5px] border-border-subtle px-6 text-center">
-            <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">No projects yet</div>
-            <div className="mt-2 max-w-md text-[11px] leading-6 text-text-dim">
-              Create your first project to start a clean, card-based project list.
+          <div className="flex min-h-[400px] flex-col items-center justify-center text-center">
+            <div className="text-[8px] uppercase tracking-[0.2em] text-text-dim animate-pulse">Empty Registry</div>
+            <div className="mt-4 max-w-md text-[10px] leading-relaxed text-text-dim/60">
+              No active projects detected. Initialize a new project module to begin data aggregation.
             </div>
             <button
               type="button"
               onClick={() => setIsCreateOpen(true)}
-              className="mt-4 border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary"
+              className="mt-6 border-[0.5px] border-accent-primary bg-transparent px-6 py-2 text-[10px] uppercase tracking-[0.15em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary"
             >
-              Create project
+              START_NEW_MISSION
             </button>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {projects.map((project) => {
-              const hasDescription = project.description.trim().length > 0;
               const hasNotes = project.notes.trim().length > 0;
 
               return (
@@ -445,42 +426,32 @@ export function ProjectPanel() {
                   key={project.id}
                   type="button"
                   onClick={() => openProject(project)}
-                  className="group flex min-h-[220px] flex-col justify-between border-[0.5px] border-border-subtle bg-bg-panel text-left transition duration-200 ease-in hover:border-accent-primary hover:bg-[rgba(122,155,168,0.06)]"
+                  className="group flex flex-col border-l-[0.5px] border-t-[0.5px] border-[rgba(122,155,168,0.12)] bg-transparent text-left transition duration-200 hover:border-accent-primary hover:bg-[rgba(122,155,168,0.04)]"
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-3 border-b-[0.5px] border-border-subtle px-4 py-2">
-                      <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                        #{project.serialNumber}
-                      </div>
-                      <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim transition group-hover:text-accent-primary">
-                        [open]
-                      </div>
-                    </div>
-
-                    <div className="px-4 py-3">
-                      <div className="text-[18px] font-light tracking-normal text-text-bright">
-                        {project.title}
-                      </div>
-                      <p className="mt-2 text-[11px] leading-6 text-text-dim">
-                        {hasDescription ? project.description : "No description yet."}
-                      </p>
-                    </div>
+                  <div className="flex items-center justify-between px-3 py-2 border-b-[0.5px] border-[rgba(122,155,168,0.06)]">
+                    <span className="text-[8px] uppercase tracking-[0.15em] text-text-dim opacity-60">P#{project.serialNumber}</span>
+                    <span className="text-[8px] uppercase tracking-[0.1em] text-accent-primary opacity-0 group-hover:opacity-100 transition-opacity">[OPEN]</span>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between gap-4 border-t-[0.5px] border-border-subtle px-4 py-2">
-                    <div className="flex items-center gap-2 text-[9px] text-text-dim">
-                      <span
-                        className={`inline-block h-2 w-2 rounded-full ${
-                          hasNotes ? "bg-status-success" : "bg-text-dim"
-                        }`}
-                      />
-                      <span className="uppercase tracking-[0.15em]">
-                        {hasNotes ? "Notes ready" : "No notes"}
+                  <div className="p-4 flex-1">
+                    <div className="text-[16px] font-light tracking-normal text-text-bright group-hover:text-accent-primary transition-colors">
+                      {project.title}
+                    </div>
+                    <p className="mt-3 text-[10px] leading-relaxed text-text-dim line-clamp-3">
+                      {project.description.trim() || "No description initialized."}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between px-3 py-2 bg-[rgba(122,155,168,0.02)] border-t-[0.5px] border-[rgba(122,155,168,0.06)]">
+                    <div className="flex items-center gap-1.5">
+                      <div className={`h-1 w-1 rounded-full ${hasNotes ? "bg-status-success" : "bg-text-dim"}`} />
+                      <span className="text-[8px] uppercase tracking-[0.1em] text-text-dim/80">
+                        {hasNotes ? "NOTES_ACTIVE" : "NO_DATA"}
                       </span>
                     </div>
-                    <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim tabular-nums">
-                      {formatUpdatedAt(project.updatedAt)}
-                    </div>
+                    <span className="text-[8px] uppercase tracking-[0.1em] text-text-dim opacity-50 tabular-nums">
+                      {formatUpdatedAt(project.updatedAt)} AGO
+                    </span>
                   </div>
                 </button>
               );
@@ -490,8 +461,8 @@ export function ProjectPanel() {
       </div>
 
       {isCreateOpen && (
-        <Modal title="Create project" eyebrow="// New Project" onClose={closeCreateModal}>
-          <div className="space-y-4 px-4 py-3">
+        <Modal title="Initialize Project" eyebrow="// NEW_PROJECT_MODULE" onClose={closeCreateModal}>
+          <div className="space-y-6 px-6 py-5">
             <div className="space-y-2">
               <label className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
                 Title
@@ -502,8 +473,8 @@ export function ProjectPanel() {
                 onChange={(event) =>
                   setCreateForm((current) => ({ ...current, title: event.target.value }))
                 }
-                placeholder="Project title"
-                className="w-full border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[6px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
+                placeholder="MISSION_TITLE"
+                className="w-full border-b-[0.5px] border-border-subtle bg-transparent px-[10px] py-[8px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary transition-colors"
               />
             </div>
 
@@ -520,8 +491,8 @@ export function ProjectPanel() {
                     description: event.target.value,
                   }))
                 }
-                placeholder="Short summary"
-                className="w-full resize-none border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[6px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
+                placeholder="OBJECTIVE_SUMMARY"
+                className="w-full resize-none border-[0.5px] border-border-subtle bg-[rgba(122,155,168,0.02)] px-[10px] py-[8px] text-[11px] text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
               />
             </div>
 
@@ -535,26 +506,26 @@ export function ProjectPanel() {
                 onChange={(event) =>
                   setCreateForm((current) => ({ ...current, notes: event.target.value }))
                 }
-                placeholder="Project details"
-                className="w-full resize-none border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[6px] text-[11px] leading-6 text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
+                placeholder="DETAILED_SPECIFICATIONS"
+                className="w-full resize-none border-[0.5px] border-border-subtle bg-[rgba(122,155,168,0.02)] px-[10px] py-[8px] text-[11px] leading-relaxed text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
               />
             </div>
 
-            <div className="flex justify-end gap-2 border-t-[0.5px] border-border-subtle pt-3">
+            <div className="flex justify-end gap-3 pt-4 border-t-[0.5px] border-[rgba(122,155,168,0.1)]">
               <button
                 type="button"
                 onClick={closeCreateModal}
-                className="border-[0.5px] border-border-subtle bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
+                className="border-[0.5px] border-border-subtle bg-transparent px-6 py-2 text-[10px] uppercase tracking-[0.15em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
               >
-                Cancel
+                ABORT
               </button>
               <button
                 type="button"
                 onClick={createProject}
                 disabled={isCreating || !createForm.title.trim()}
-                className="border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-accent-primary"
+                className="border-[0.5px] border-accent-primary bg-transparent px-6 py-2 text-[10px] uppercase tracking-[0.15em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-30"
               >
-                {isCreating ? "Creating..." : "Create"}
+                {isCreating ? "PROCESS..." : "INITIALIZE"}
               </button>
             </div>
           </div>
@@ -564,65 +535,63 @@ export function ProjectPanel() {
       {activeProject && (
         <Modal
           title={activeProject.title}
-          eyebrow={`// Project #${activeProject.serialNumber}`}
+          eyebrow={`// PROJECT_MODULE #${activeProject.serialNumber}`}
           headerActions={
             <>
               {!isEditingNotes ? (
                 <button
                   type="button"
                   onClick={() => setIsTaskModalOpen(true)}
-                  className="border-[0.5px] border-border-subtle bg-transparent px-3 py-2 text-[10px] uppercase tracking-[0.1em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
+                  className="border-[0.5px] border-accent-primary bg-transparent px-3 py-2 text-[8px] uppercase tracking-[0.15em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary"
                 >
-                  New task
+                  APPEND_TASK
                 </button>
               ) : null}
               {!isEditingNotes ? (
                 <button
                   type="button"
                   onClick={startEditingNotes}
-                  className="border-[0.5px] border-border-subtle bg-transparent px-3 py-2 text-[10px] uppercase tracking-[0.1em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
+                  className="border-[0.5px] border-border-subtle bg-transparent px-3 py-2 text-[8px] uppercase tracking-[0.15em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
                 >
-                  Edit
+                  EDIT_DATA
                 </button>
               ) : null}
             </>
           }
           onClose={closeProjectModal}
         >
-          <div className="space-y-5 px-4 py-3">
-            <div className="grid gap-3 border-[0.5px] border-border-subtle p-3 sm:grid-cols-2">
-              <div>
-                <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Title</div>
-                <div className="mt-1 text-[18px] font-light tracking-normal text-text-bright">
-                  {activeProject.title}
+          <div className="space-y-8 px-6 py-5">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-2">
+              <div className="lg:col-span-2 border-b-[0.5px] border-border-subtle pb-4">
+                <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Objective</div>
+                <div className="mt-2 text-[11px] leading-relaxed text-text-primary">
+                  {activeProject.description.trim() || "No objective initialized."}
                 </div>
               </div>
+              
               <div>
-                <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                  Description
-                </div>
-                <div className="mt-1 text-[11px] leading-6 text-text-primary">
-                  {activeProject.description.trim() || "No description yet."}
-                </div>
-              </div>
-              <div>
-                <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Created</div>
+                <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Registry entry</div>
                 <div className="mt-1 text-[11px] text-text-bright tabular-nums">
                   {formatTimestamp(activeProject.createdAt)}
                 </div>
               </div>
               <div>
-                <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Last updated</div>
+                <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">Last update</div>
                 <div className="mt-1 text-[11px] text-text-bright tabular-nums">
                   {formatTimestamp(activeProject.updatedAt)}
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                Notes
-              </label>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border-b-[0.5px] border-border-subtle pb-2">
+                <label className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
+                  Internal Specifications
+                </label>
+                {isEditingNotes && (
+                  <span className="text-[8px] uppercase tracking-[0.1em] text-accent-primary animate-pulse">MODERATING</span>
+                )}
+              </div>
               {isEditingNotes ? (
                 <textarea
                   rows={10}
@@ -630,59 +599,53 @@ export function ProjectPanel() {
                   onChange={(event) =>
                     setDraft((current) => ({ ...current, notes: event.target.value }))
                   }
-                  placeholder="Project details"
-                  className="w-full resize-none border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[6px] text-[11px] leading-6 text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
+                  placeholder="PROJECT_DETAILS"
+                  className="w-full resize-none border-[0.5px] border-border-subtle bg-[rgba(122,155,168,0.02)] px-[10px] py-[8px] text-[11px] leading-relaxed text-text-primary outline-none placeholder:text-text-dim focus:border-accent-primary"
                 />
               ) : (
-                <div className="min-h-[200px] border-[0.5px] border-border-subtle bg-bg-primary px-[10px] py-[6px] text-[11px] leading-6 text-text-primary whitespace-pre-wrap">
-                  {activeProject.notes.trim() || "No notes yet."}
+                <div className="min-h-[160px] text-[11px] leading-relaxed text-text-primary whitespace-pre-wrap">
+                  {activeProject.notes.trim() || "No specifications defined."}
                 </div>
               )}
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-3">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b-[0.5px] border-border-subtle pb-2">
                 <label className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                  Tasks
+                  Linked Sequences
                 </label>
                 <div className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                  {projectTasks.length} linked
+                  {projectTasks.length} NODES
                 </div>
               </div>
 
-              <div className="border-[0.5px] border-border-subtle bg-bg-primary">
+              <div className="space-y-px">
                 {projectTasks.length === 0 ? (
-                  <div className="px-[10px] py-[10px] text-[11px] text-text-dim">
-                    No tasks linked to this project yet.
+                  <div className="py-4 text-[10px] text-text-dim uppercase tracking-[0.05em]">
+                    No task sequences linked.
                   </div>
                 ) : (
                   <div>
-                    {projectTasks.map((task, index) => (
+                    {projectTasks.map((task) => (
                       <div
                         key={task.id}
-                        className={`px-[10px] py-[8px] ${
-                          index === 0 ? "" : "border-t-[0.5px] border-border-subtle"
-                        }`}
+                        className="group flex items-start justify-between gap-4 border-b-[0.5px] border-[rgba(122,155,168,0.05)] py-3 transition hover:bg-[rgba(122,155,168,0.02)]"
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                              <span>#{task.serialNumber}</span>
-                              <span>{task.startTime} - {task.endTime}</span>
-                            </div>
-                            <div className="mt-1 text-[11px] text-text-bright">
-                              {task.title}
-                            </div>
-                            {task.description ? (
-                              <div className="mt-1 text-[10px] text-text-dim">
-                                {task.description}
-                              </div>
-                            ) : null}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-3 text-[8px] uppercase tracking-[0.15em]">
+                            <span className="text-accent-primary opacity-60">#{task.serialNumber}</span>
+                            <span className="text-text-dim tabular-nums">{task.startTime} - {task.endTime}</span>
                           </div>
-                          <div className="text-right text-[8px] uppercase tracking-[0.15em] text-text-dim">
-                            <div>{formatTaskStatus(task)}</div>
-                            <div className="mt-1">{formatTaskPriority(task.priority)}</div>
+                          <div className="mt-1 text-[11px] text-text-bright group-hover:text-accent-primary transition-colors">
+                            {task.title}
                           </div>
+                        </div>
+                        <div className="text-right text-[8px] uppercase tracking-[0.15em]">
+                          <div className={
+                            task.status === 'completed' ? 'text-status-success' :
+                            task.status === 'in_progress' ? 'text-status-warning' : 'text-text-dim'
+                          }>{formatTaskStatus(task)}</div>
+                          <div className="mt-1 text-text-dim opacity-50">{formatTaskPriority(task.priority)}</div>
                         </div>
                       </div>
                     ))}
@@ -691,42 +654,42 @@ export function ProjectPanel() {
               </div>
             </div>
 
-            <div className="flex flex-col-reverse gap-3 border-t-[0.5px] border-border-subtle pt-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col-reverse gap-4 border-t-[0.5px] border-[rgba(122,155,168,0.1)] pt-6 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
                 onClick={deleteCurrentProject}
                 disabled={isDeleting}
-                className="border-[0.5px] border-status-error bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-status-error transition hover:bg-status-error hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-status-error"
+                className="text-[8px] uppercase tracking-[0.2em] text-status-error opacity-50 hover:opacity-100 transition-opacity disabled:opacity-20"
               >
-                {isDeleting ? "Deleting..." : "Delete project"}
+                {isDeleting ? "DECOMMISSIONING..." : "[ DELETE_MODULE ]"}
               </button>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-3">
                 {isEditingNotes ? (
                   <>
                     <button
                       type="button"
                       onClick={cancelEditingNotes}
-                      className="border-[0.5px] border-border-subtle bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
+                      className="border-[0.5px] border-border-subtle bg-transparent px-6 py-2 text-[10px] uppercase tracking-[0.15em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
                     >
-                      Cancel
+                      ABORT
                     </button>
                     <button
                       type="button"
                       onClick={saveProject}
                       disabled={isSaving || !hasDraftChanges}
-                      className="border-[0.5px] border-accent-primary bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-accent-primary"
+                      className="border-[0.5px] border-accent-primary bg-transparent px-6 py-2 text-[10px] uppercase tracking-[0.15em] text-accent-primary transition hover:bg-accent-primary hover:text-bg-primary disabled:opacity-30"
                     >
-                      {isSaving ? "Saving..." : "Save changes"}
+                      {isSaving ? "COMMIT..." : "SAVE_DATA"}
                     </button>
                   </>
                 ) : (
                   <button
                     type="button"
                     onClick={closeProjectModal}
-                    className="border-[0.5px] border-border-subtle bg-transparent px-4 py-2 text-[10px] uppercase tracking-[0.1em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
+                    className="border-[0.5px] border-border-subtle bg-transparent px-6 py-2 text-[10px] uppercase tracking-[0.15em] text-text-primary transition hover:border-accent-primary hover:text-accent-primary"
                   >
-                    Done
+                    DISMISS
                   </button>
                 )}
               </div>

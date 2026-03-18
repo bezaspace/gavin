@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Terminal" },
   { href: "/tasks", label: "Tasks" },
   { href: "/projects", label: "Projects" },
+  { href: "/brain-dump", label: "Brain Dump" },
   { href: "/timeline", label: "Timeline" },
 ] as const;
 
@@ -34,10 +35,10 @@ export function AppNav() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded border px-3 py-1 text-[8px] uppercase tracking-[0.16em] transition-colors ${
+                className={`border px-3 py-1 text-[8px] uppercase tracking-[0.16em] transition-colors ${
                   active
-                    ? "border-[rgba(122,155,168,0.35)] bg-[rgba(122,155,168,0.08)] text-text-bright"
-                    : "border-[rgba(122,155,168,0.08)] text-text-dim hover:border-[rgba(122,155,168,0.18)] hover:text-text-bright"
+                    ? "border-accent-primary bg-[rgba(122,155,168,0.1)] text-text-bright"
+                    : "border-[rgba(122,155,168,0.12)] text-text-dim hover:border-accent-primary hover:text-text-bright hover:bg-[rgba(122,155,168,0.04)]"
                 }`}
               >
                 {item.label}

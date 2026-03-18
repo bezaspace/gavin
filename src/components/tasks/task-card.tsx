@@ -35,25 +35,25 @@ export function TaskCard({ task, active = false, onClick }: TaskCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className={`w-full border-[0.5px] bg-bg-panel px-3 py-2 text-left transition-colors ${
+      className={`w-full border-b-[0.5px] px-3 py-2 text-left transition-colors ${
         active
-          ? "border-accent-primary bg-[rgba(122,155,168,0.06)]"
-          : "border-[rgba(122,155,168,0.1)] hover:border-[rgba(122,155,168,0.2)]"
+          ? "border-accent-primary bg-[rgba(122,155,168,0.08)]"
+          : "border-[rgba(122,155,168,0.12)] bg-transparent hover:bg-[rgba(122,155,168,0.03)] hover:border-[rgba(122,155,168,0.2)]"
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <span className="border-[0.5px] border-[rgba(122,155,168,0.12)] px-1.5 py-0.5 text-[8px] uppercase tracking-[0.15em] text-text-dim">
+            <span className="text-[8px] uppercase tracking-[0.15em] text-accent-primary opacity-80">
               #{task.serialNumber}
             </span>
             <span className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
-              {task.startTime} - {task.endTime}
+              [{task.startTime} - {task.endTime}]
             </span>
-            <span className="border-[0.5px] border-[rgba(122,155,168,0.12)] px-1.5 py-0.5 text-[8px] uppercase tracking-[0.15em] text-text-dim">
+            <span className="text-[8px] uppercase tracking-[0.15em] text-text-dim">
               {task.projectTitle
-                ? `P#${task.projectSerialNumber ?? "?"} ${task.projectTitle}`
-                : "UNASSIGNED"}
+                ? `:: P#${task.projectSerialNumber ?? "?"} ${task.projectTitle}`
+                : ":: UNASSIGNED"}
             </span>
           </div>
           <div
